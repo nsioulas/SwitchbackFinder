@@ -33,7 +33,7 @@ If you have any questions, please don't hesitate to reach out to nsioulas@g.ucla
 
 # Citation
 
-If you use this work, please cite:
+If you found this work useful and used it for your analysis, please cite:
 
 ```
 @ARTICLE{2021ApJ...919L..31T,

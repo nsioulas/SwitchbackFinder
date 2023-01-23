@@ -1,6 +1,6 @@
 # SwitchbackFinder
 
-A collection of functions for downloading and cleaning Parker Solar Probe and Solar Orbiter data. After cleaning the data an automated algorithm is used to identify magnetic switchbacks
+A collection of functions for downloading and cleaning Parker Solar Probe and Solar Orbiter data. After cleaning the data an automated algorithm is used to identify magnetic switchbacks. The workflow is the following:
 
   - Organize the magnetic field data by month for analysis.
   - Identify any gaps in the magnetic field time series data.
@@ -11,8 +11,9 @@ A collection of functions for downloading and cleaning Parker Solar Probe and So
   - Consider the duration of the identified events and convert the temporal scales to spatial scales using the modified Taylor's hypothesis, $\ell =V_{tot}* \delta \tau$, where $V_{tot} = |\boldsymbol{V_{sw} + \boldsymbol{V}{a} - \boldsymbol{V}{sc}}|$, and $d_i$ is the ion inertial length.
   - Due to poor data quality, data from the Parker Solar Probe (PSP) beyond 0.5 astronomical units (AU) should not be used. Instead, data from the Solar Orbiter (SoLO) should be utilized for analysis between 0.5 and 1 AU.
 
-# Installation  (Please take a look at the environemnt found in my repository: MHDTurbPy)
-  - create conda enviroment
+# Installation  
+
+  - create conda enviroment (Please take a look at the environemnt found in my repository: MHDTurbPy)
   
 ```bash
 conda env create -n MHDTurbPy --file /path/to/environment.yml 
@@ -20,8 +21,7 @@ conda env create -n MHDTurbPy --file /path/to/environment.yml
 
  - Download the package
 ``` bash
-git clone https://github.com/nsioulas/SwitchbackFinder
-/
+git clone https://github.com/nsioulas/SwitchbackFinder/
 ```
 
 # Usage

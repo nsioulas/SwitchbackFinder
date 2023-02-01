@@ -55,29 +55,29 @@ def final_func(B, av_hours, threshold_angle):
     
    # nindex        = B.index
    # B             = V.reindex(V.index.union(nindex)).interpolate(method='nearest').reindex(nindex)
-    
+
     B['Bmag']     = np.sqrt(B.Br**2 + B.Bt**2 + B.Bn**2)
 
     ### Define averaging window
-    lag          = (B.index[1]-B.index[0])/np.timedelta64(1,'s') 
+    lag          = (B.index[1]-B.index[0])/np.timedelta64(1,'s')
     av_window    = int(av_hours*3600/lag)
 
     ### Estimate moving average ###
-    B['Br_av']   = B['Br'].rolling(int(av_window), center=True).mean()
-    B['Bt_av']   = B['Bt'].rolling(int(av_window), center=True).mean()
-    B['Bn_av']   = B['Bn'].rolling(int(av_window), center=True).mean()
-    
+    B['Br_av'] = B['Br'].rolling(av_window, center=True).mean()
+    B['Bt_av'] = B['Bt'].rolling(av_window, center=True).mean()
+    B['Bn_av'] = B['Bn'].rolling(av_window, center=True).mean()
+        
 
-    B['Br_rms']   = (B['Br']**2).rolling(int(av_window), center=True).mean()
-    B['Bt_rms']   = (B['Bt']**2).rolling(int(av_window), center=True).mean()
-    B['Bn_rms']   = (B['Bn']**2).rolling(int(av_window), center=True).mean()
-    
+    B['Br_rms'] = (B['Br']**2).rolling(av_window, center=True).mean()
+    B['Bt_rms'] = (B['Bt']**2).rolling(av_window, center=True).mean()
+    B['Bn_rms'] = (B['Bn']**2).rolling(av_window, center=True).mean()
+
     B['Br_var']   = B['Br_rms'] -B['Br_av']**2
     B['Bt_var']   = B['Bt_rms'] -B['Bt_av']**2
     B['Bn_var']   = B['Bn_rms'] -B['Bn_av']**2
-    
+
     B['Bmag_av']  = np.sqrt(B['Br_av']**2 + B['Bt_av']**2 + B['Bn_av']**2) 
-    
+
     theta2 = np.arccos((B.Br*B.Br_av+B.Bn*B.Bn_av+B.Bt*B.Bt_av)/(B['Bmag']*B['Bmag_av']))*(180/np.pi) #angle between B and <B>
 
     time1     = []
@@ -88,13 +88,13 @@ def final_func(B, av_hours, threshold_angle):
     dur       = []
     points    = []
     counts    = []
-    
+
     time1, time2             = anglefinder(theta2.values, B.index, time1,time2, threshold_angle)
 
     points, excur_br, counts = estimatedexcur(B.Br_av.values, B.Br.values, time1, time2, B.index, excur_br, points, counts)
     points, excur_bt, counts = estimatedexcur(B.Bt_av.values, B.Bt.values, time1, time2, B.index, excur_bt, points, counts)
     points, excur_bn, counts = estimatedexcur(B.Bn_av.values, B.Bn.values, time1, time2, B.index, excur_bn, points, counts)
-    
+
     return time1, time2, points, excur_br,excur_bt,excur_bn, counts, B.Br_av.values,B.Bt_av.values, B.Bt_av.values,B.Br_rms.values,B.Br_var.values, B.Bt_rms.values, B.Bt_var.values, B.Bn_rms.values, B.Bn_var.values
 
 
@@ -158,15 +158,15 @@ def slid_av(den,delta_i,den_av):
         if ((i-int(delta_i/2))>=0 and (i+int(delta_i/2)<=len(den)-1)):
             x = np.sum(den[i-int(delta_i/2):i+int(delta_i/2)])/delta_i
             den_av[i] = x
-            i = i+1
+            i += 1
         if i-int(delta_i/2)<0:
             x = np.sum(den[i:i+delta_i])/delta_i
             den_av[i] = x
-            i = i+1
+            i += 1
         if i+int(delta_i/2)>len(den)-1:
             x = np.sum(den[i-delta_i:i])/delta_i
             den_av[i] = x
-            i = i+1
+            i += 1
     return den_av
 
 
@@ -182,11 +182,7 @@ def elimiatesb(br, time1, time2, time, br_nsb, time_nsb):
         start = val1[0]
         end = val2[0]
         if (end-start>0):
-            for idx in range(start, end):
-            #This step is to find the magnetic field between the duration
-            #so that we can find the max within the duration. The other value
-            #is so that we can find the average of the modal magnetic field.
-                del_idx.append(idx)
+            del_idx.extend(iter(range(start, end)))
         index+=1
     br_nsb = np.delete(br,del_idx)
     time_nsb = np.delete(time,del_idx)
@@ -200,15 +196,15 @@ def slid_av(den,delta_i,den_av):
         if ((i-int(delta_i/2))>=0 and (i+int(delta_i/2)<=len(den)-1)):
             x = np.sum(den[i-int(delta_i/2):i+int(delta_i/2)])/delta_i
             den_av[i] = x
-            i = i+1
+            i += 1
         if i-int(delta_i/2)<0:
             x = np.sum(den[i:i+delta_i])/delta_i
             den_av[i] = x
-            i = i+1
+            i += 1
         if i+int(delta_i/2)>len(den)-1:
             x = np.sum(den[i-delta_i:i])/delta_i
             den_av[i] = x
-            i = i+1
+            i += 1
     return den_av
 
 
@@ -217,11 +213,11 @@ def slid_av(den,delta_i,den_av):
 def remove_big_gaps(big_gaps, B_resampled):
     import datetime
     keys =list(big_gaps.keys())
-    """ Now remove the gaps indentified earlier """ 
+    """ Now remove the gaps indentified earlier """
     if len(big_gaps)>0:
         for o in range(len(big_gaps)):
             if o%5==0:
-                print("Completed = "+ str(100*o/len(big_gaps)))
+                print(f"Completed = {str(100 * o / len(big_gaps))}")
             dt2 = big_gaps.index[o]
             dt1 = big_gaps.index[o]-datetime.timedelta(seconds=big_gaps[keys[0]][o])
             if o==0:
@@ -238,12 +234,11 @@ def identify_gaps_in_timeseries(df, gap_time_threshold):
     
     # First find out what keys does the timeseries have
     keys = list(df.keys())
-    
+
     # Identify  big gaps in our timeseries ###
     f2          = df.dropna()
     time        = (f2.index.to_series().diff()/np.timedelta64(1, 's'))
-    big_gaps    = time[time>gap_time_threshold]
-    return  big_gaps
+    return time[time>gap_time_threshold]
 
 
 
